@@ -8,4 +8,25 @@ RSS is a specialized format designed to describe news feeds, article announcemen
 
 RSS Reader is a service for aggregating RSS feeds, which makes it convenient to read various sources, such as blogs. It allows users to add an unlimited number of RSS feeds, updates them automatically, and adds new entries to the common stream.
 
+## Demonstration
+
+Link: https://frontend-project-11-dun.vercel.app/
+
 ## Setup
+
+### Clone this repository on your computer 
+
+With SSH URLs:
+```
+git clone git@github.com:yurynefedov/frontend-project-11.git 
+```
+Or with HTTPS URLs:
+```
+git clone https://github.com/yurynefedov/frontend-project-11.git 
+```
+
+### Run the following command while you are in the root directory:
+
+```
+make install
+```
