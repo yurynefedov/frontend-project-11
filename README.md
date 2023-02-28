@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/yurynefedov/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/yurynefedov/frontend-project-11/actions) [![Maintainability](https://api.codeclimate.com/v1/badges/8d98b209d9385e4a0fa1/maintainability)](https://codeclimate.com/github/yurynefedov/frontend-project-11/maintainability)
+[![Actions Status](https://github.com/yurynefedov/frontend-project-11/workflows/hexlet-check/badge.svg)](https://github.com/yurynefedov/frontend-project-11/actions) [![Node CI](https://github.com/yurynefedov/frontend-project-11/actions/workflows/nodejs.yml/badge.svg)](https://github.com/yurynefedov/frontend-project-11/actions/workflows/nodejs.yml) [![Maintainability](https://api.codeclimate.com/v1/badges/8d98b209d9385e4a0fa1/maintainability)](https://codeclimate.com/github/yurynefedov/frontend-project-11/maintainability)
 
 # RSS Reader
 
