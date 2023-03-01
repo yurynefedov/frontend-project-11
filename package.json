@@ -13,6 +13,7 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
     "lodash": "^4.17.21",
+    "on-change": "^4.0.2",
     "yup": "^1.0.2"
   },
   "devDependencies": {
