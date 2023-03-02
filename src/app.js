@@ -1,5 +1,6 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import render from './render.js';
 
 const validateForm = (url, feeds) => {
   const schema = yup
@@ -10,28 +11,6 @@ const validateForm = (url, feeds) => {
     .notOneOf(feeds, 'RSS уже существует');
 
   return schema.validate(url, { abortEarly: false });
-};
-
-const renderValidationResult = (elements, state, validationState) => {
-  const scenarios = {
-    true: () => {
-      elements.inputField.classList.remove('is-invalid');
-      elements.inputFeedback.classList.remove('text-danger');
-      elements.inputField.classList.add('is-valid');
-      elements.inputFeedback.classList.add('text-success');
-      elements.inputFeedback.textContent = 'Валидация пройдена';
-      elements.inputForm.reset();
-      elements.inputField.focus();
-    },
-    false: () => {
-      elements.inputField.classList.add('is-invalid');
-      elements.inputFeedback.classList.remove('text-success');
-      elements.inputFeedback.classList.add('text-danger');
-      elements.inputFeedback.textContent = state.inputFormValidation.errorMessage;
-    },
-  };
-
-  scenarios[validationState]();
 };
 
 export default () => {
@@ -51,9 +30,10 @@ export default () => {
     },
   };
 
-  const watchedState = onChange(state, (path, value) => {
-    if (path === 'inputFormValidation.valid') renderValidationResult(elements, state, value);
-  });
+  const watchedState = onChange(
+    state,
+    (path, value) => render(path, elements, state, value),
+  );
 
   elements.inputForm.addEventListener('submit', (event) => {
     event.preventDefault();
