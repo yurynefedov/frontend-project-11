@@ -1,11 +1,11 @@
-const renderValidationResult = (elements, watchedState, validationState) => {
+const renderValidationResult = (elements, watchedState, validationState, i18next) => {
   const validationScenarios = {
     true: () => {
       elements.inputField.classList.remove('is-invalid');
       elements.inputFeedback.classList.remove('text-danger');
       elements.inputField.classList.add('is-valid');
       elements.inputFeedback.classList.add('text-success');
-      elements.inputFeedback.textContent = 'Валидация пройдена';
+      elements.inputFeedback.textContent = i18next.t('inputFeedback.success');
       elements.inputForm.reset();
       elements.inputField.focus();
     },
@@ -13,22 +13,27 @@ const renderValidationResult = (elements, watchedState, validationState) => {
       elements.inputField.classList.add('is-invalid');
       elements.inputFeedback.classList.remove('text-success');
       elements.inputFeedback.classList.add('text-danger');
-      elements.inputFeedback.textContent = watchedState.inputFormValidation.errorMessage;
+      elements.inputFeedback.textContent = watchedState.inputFeedback;
     },
   };
 
   validationScenarios[validationState]();
 };
 
-export default (path, pageElements, watchedState, value) => {
+const renderInputFeedback = (elements, value) => {
+  elements.inputFeedback.textContent = value;
+};
+
+export default (path, elements, watchedState, value, i18next) => {
   switch (path) {
-    case 'inputFormValidation.valid': renderValidationResult(pageElements, watchedState, value);
+    case 'inputFormValidation.valid': renderValidationResult(elements, watchedState, value, i18next);
+      break;
+    case 'inputFeedback': renderInputFeedback(elements, value);
       break;
     case 'feeds':
     case 'inputFormValidation.state':
-    case 'inputFormValidation.errorMessage':
       return;
     default:
-      throw new Error(`Unknown change of state: ${path} in ${JSON.stringify(watchedState)}`);
+      throw new Error(`Unknown change of state: ${path}`);
   }
 };
