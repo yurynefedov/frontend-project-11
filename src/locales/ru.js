@@ -8,5 +8,8 @@ export default {
       unknownError: 'Что-то пошло не так',
       success: 'RSS успешно загружен',
     },
+    feeds: 'Фиды',
+    posts: 'Посты',
+    postViewButton: 'Просмотр',
   },
 };

@@ -2,6 +2,8 @@ import * as yup from 'yup';
 import { setLocale } from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
+import axios from 'axios';
+import { uniqueId } from 'lodash';
 import render from './render.js';
 import resources from './locales/index.js';
 
@@ -37,11 +39,14 @@ const elements = {
   inputField: document.querySelector('#url-input'),
   inputFeedback: document.querySelector('.feedback'),
   submitButton: document.querySelector('button[type="submit"]'),
+  postsContainer: document.querySelector('.posts'),
+  feedsContainer: document.querySelector('.feeds'),
 };
 
 export default () => {
   const state = {
     feeds: [],
+    posts: [],
     inputFormValidation: {
       state: 'filing', // filing, proccessing, processed, failed
       valid: null, // true, false
@@ -56,20 +61,16 @@ export default () => {
 
   elements.inputForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    console.log('Я сабмит'); // Для отладки
     const formData = new FormData(event.target);
     const url = formData.get('url').trim().toLowerCase();
     console.log(url); // Для отладки
     validateForm(url, watchedState.feeds)
       .then((validUrl) => {
-        console.log(validUrl); // Для отладки
         watchedState.inputFormValidation.valid = true;
         watchedState.inputFormValidation.state = 'processing';
         watchedState.feeds.push(validUrl);
       })
       .catch((error) => {
-        console.log(error); // Для отладки
-        console.log('Я ошибка'); // Для отладки
         watchedState.inputFormValidation.valid = false;
         watchedState.inputFeedback = error.message;
       });
