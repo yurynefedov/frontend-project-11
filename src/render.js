@@ -31,6 +31,7 @@ export default (path, elements, watchedState, value, i18next) => {
     case 'inputFeedback': renderInputFeedback(elements, value);
       break;
     case 'feeds':
+    case 'posts':
     case 'inputFormValidation.state':
       return;
     default:
