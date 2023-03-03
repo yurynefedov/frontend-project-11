@@ -1,5 +1,4 @@
 import * as yup from 'yup';
-import { setLocale } from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
 import axios from 'axios';
@@ -25,7 +24,7 @@ const validateForm = (url, feeds) => {
   return schema.validate(url, { abortEarly: false });
 };
 
-setLocale({
+yup.setLocale({
   mixed: {
     notOneOf: i18nInstance.t('inputFeedback.alreadyExist'),
   },
