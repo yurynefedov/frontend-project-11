@@ -45,52 +45,52 @@ const elements = {
 
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
 
-const listFeeds = (list, watchedState) => {
+const generateCard = (path, container, i18next) => {
+  container.innerHTML = '';
+  const card = document.createElement('div');
+  card.classList.add('card', 'border-0');
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+  const cardTitle = document.createElement('h2');
+  cardTitle.classList.add('card-title', 'h4');
+  cardTitle.textContent = i18next.t(path);
+  const ul = document.createElement('ul');
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+
+  cardBody.appendChild(cardTitle);
+  card.appendChild(cardBody);
+  card.appendChild(ul);
+  container.appendChild(card);
+};
+
+const appendFeeds = (watchedState) => {
+  const ul = document.querySelector('.feeds ul');
   watchedState.feeds.forEach((feed) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
-
     const listItemHeading = document.createElement('h3');
     listItemHeading.classList.add('h6', 'm-0');
     listItemHeading.textContent = feed.title;
-
     const listItemDescription = document.createElement('p');
     listItemDescription.classList.add('m-0', 'small', 'text-black-50');
     listItemDescription.textContent = feed.description;
 
     li.appendChild(listItemHeading);
     li.appendChild(listItemDescription);
-
-    list.appendChild(li);
+    ul.appendChild(li);
   });
 };
 
 const renderFeeds = (elements, watchedState, i18next) => {
-  const container = elements.feedsContainer;
-  container.innerHTML = '';
-  const feedsCard = document.createElement('div');
-  feedsCard.classList.add('card', 'border-0');
-  const feedsCardBody = document.createElement('div');
-  feedsCardBody.classList.add('card-body');
-  const feedsCardTitle = document.createElement('h2');
-  feedsCardTitle.classList.add('card-title', 'h4');
-  feedsCardTitle.textContent = i18next.t('feeds');
-  feedsCardBody.appendChild(feedsCardTitle);
-
-  const ul = document.createElement('ul');
-  ul.classList.add('list-group', 'border-0', 'rounded-0');
-  listFeeds(ul, watchedState);
-
-  feedsCard.appendChild(feedsCardBody);
-  feedsCard.appendChild(ul);
-  container.appendChild(feedsCard);
+  generateCard('feeds', elements.feedsContainer, i18next);
+  appendFeeds(watchedState);
 };
 
-const listPosts = (list, watchedState, i18next) => {
+const appendPosts = (watchedState, i18next) => {
+  const ul = document.querySelector('.posts ul');
   watchedState.posts.forEach((post) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-
     const link = document.createElement('a');
     link.href = post.link;
     link.classList.add('fw-bold');
@@ -98,7 +98,6 @@ const listPosts = (list, watchedState, i18next) => {
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
     link.textContent = post.title;
-
     const button = document.createElement('button');
     button.type = 'button';
     button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
@@ -109,35 +108,13 @@ const listPosts = (list, watchedState, i18next) => {
 
     li.appendChild(link);
     li.appendChild(button);
-
-    list.appendChild(li);
+    ul.appendChild(li);
   });
 };
 
 const renderPost = (elements, watchedState, i18next) => {
-  const container = elements.postsContainer;
-  container.innerHTML = '';
-
-  const postsCard = document.createElement('div');
-  postsCard.classList.add('card', 'border-0');
-
-  const postsCardBody = document.createElement('div');
-  postsCardBody.classList.add('card-body');
-
-  const cardTitle = document.createElement('h2');
-  cardTitle.classList.add('card-title', 'h4');
-  cardTitle.innerText = 'Посты';
-
-  postsCard.appendChild(cardTitle);
-
-  const ul = document.createElement('ul');
-  ul.classList.add('list-group', 'border-0', 'rounded-0');
-  listPosts(ul, watchedState, i18next);
-
-  postsCard.appendChild(postsCardBody);
-  postsCard.appendChild(ul);
-
-  container.appendChild(postsCard);
+  generateCard('posts', elements.postsContainer, i18next);
+  appendPosts(watchedState, i18next);
 };
 
 export default () => {
