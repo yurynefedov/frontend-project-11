@@ -45,6 +45,40 @@ const elements = {
 
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
 
+const getFeedsAndPostsData = (content, watchedState, url) => {
+  try {
+    const channel = content.querySelector('channel');
+    const feedTitle = channel.querySelector('title');
+    const feedDescription = channel.querySelector('description');
+
+    const feed = {
+      title: feedTitle.textContent,
+      description: feedDescription.textContent,
+      url,
+      id: uniqueId(),
+    };
+    watchedState.feeds.unshift(feed);
+
+    const items = channel.querySelectorAll('item');
+    items.forEach((item) => {
+      const itemTitle = item.querySelector('title');
+      const itemDescription = item.querySelector('description');
+      const itemLink = item.querySelector('link');
+
+      const post = {
+        title: itemTitle.textContent,
+        description: itemDescription.textContent,
+        link: itemLink.textContent,
+        feedId: feed.id,
+        id: uniqueId(),
+      };
+      watchedState.posts.unshift(post);
+    });
+  } catch {
+    throw new Error(i18nInstance.t('inputFeedback.notValidRSS'));
+  }
+};
+
 export default () => {
   const state = {
     feeds: [],
@@ -65,7 +99,6 @@ export default () => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const url = formData.get('url').trim().toLowerCase();
-    console.log(url); // Для отладки
     const existedFeedsUrls = watchedState.feeds.map((feed) => feed.url);
     validateForm(url, existedFeedsUrls)
       .then((validUrl) => {
@@ -74,43 +107,8 @@ export default () => {
         return axios.get(proxifyUrl(validUrl));
       })
       .then((response) => {
-        console.log('second then');
-        console.log(RSSparser(response.data.contents));
         const sourceContent = RSSparser(response.data.contents);
-
-        // Вынести в отдельную функцию, которая принимает параметром sourceContent
-        const channel = sourceContent.querySelector('channel');
-        if (!channel) throw new Error(i18nInstance.t('inputFeedback.notValidRSS'));
-        const feedTitle = channel.querySelector('title');
-        const feedDescription = channel.querySelector('description');
-
-        const feed = {
-          title: feedTitle.textContent,
-          description: feedDescription.textContent,
-          url,
-          id: uniqueId(),
-        };
-        console.log(feed);
-        watchedState.feeds.unshift(feed);
-        console.log(state.feeds[0]); // Каждый новый фид появляется сверху
-
-        const items = channel.querySelectorAll('item');
-        items.forEach((item) => {
-          console.log(item);
-          const itemTitle = item.querySelector('title');
-          const itemDescription = item.querySelector('description');
-          const itemLink = item.querySelector('link');
-
-          const post = {
-            title: itemTitle.textContent,
-            description: itemDescription.textContent,
-            link: itemLink.textContent,
-            feedId: feed.id,
-            id: uniqueId(),
-          };
-          watchedState.posts.unshift(post);
-        });
-        console.log(state.posts.length);
+        getFeedsAndPostsData(sourceContent, watchedState, url);
       })
       .catch((error) => {
         watchedState.inputFormValidation.valid = false;
