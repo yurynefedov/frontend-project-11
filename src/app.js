@@ -27,10 +27,10 @@ const validateForm = (url, existedFeedsUrls) => {
 
 yup.setLocale({
   mixed: {
-    notOneOf: i18nInstance.t('inputFeedback.alreadyExist'),
+    notOneOf: i18nInstance.t('inputFeedback.errors.alreadyExist'),
   },
   string: {
-    url: i18nInstance.t('inputFeedback.notValidUrl'),
+    url: i18nInstance.t('inputFeedback.errors.notValidUrl'),
   },
 });
 
@@ -75,7 +75,7 @@ const getFeedsAndPostsData = (content, watchedState, url) => {
       watchedState.posts.unshift(post);
     });
   } catch {
-    throw new Error(i18nInstance.t('inputFeedback.notValidRSS'));
+    throw new Error(i18nInstance.t('inputFeedback.errors.notValidRSS'));
   }
 };
 
@@ -83,11 +83,11 @@ export default () => {
   const state = {
     feeds: [],
     posts: [],
-    inputFormValidation: {
-      state: 'filing', // filing, proccessing, processed, failed
+    error: '',
+    inputForm: {
+      state: 'filing', // filing, processing, processed, failed
       valid: null, // true, false
     },
-    inputFeedback: '',
   };
 
   const watchedState = onChange(
@@ -102,17 +102,19 @@ export default () => {
     const existedFeedsUrls = watchedState.feeds.map((feed) => feed.url);
     validateForm(url, existedFeedsUrls)
       .then((validUrl) => {
-        watchedState.inputFormValidation.valid = true;
-        watchedState.inputFormValidation.state = 'processing';
+        watchedState.inputForm.valid = true;
+        watchedState.inputForm.state = 'processing';
         return axios.get(proxifyUrl(validUrl));
       })
       .then((response) => {
         const sourceContent = RSSparser(response.data.contents);
         getFeedsAndPostsData(sourceContent, watchedState, url);
+        watchedState.inputForm.state = 'processed';
       })
       .catch((error) => {
-        watchedState.inputFormValidation.valid = false;
-        watchedState.inputFeedback = error.message;
+        if (error.name === 'ValidationError') watchedState.inputForm.valid = false;
+        else watchedState.inputForm.state = 'failed';
+        watchedState.error = error.message;
       });
   });
 };

@@ -1,27 +1,51 @@
-const renderValidationResult = (elements, watchedState, validationState, i18next) => {
+const renderValidationResult = (elements, watchedState, validationState) => {
   const validationScenarios = {
-    true: () => {
-      elements.inputField.classList.remove('is-invalid');
-      elements.inputFeedback.classList.remove('text-danger');
-      elements.inputField.classList.add('is-valid');
-      elements.inputFeedback.classList.add('text-success');
-      elements.inputFeedback.textContent = i18next.t('inputFeedback.success');
-      elements.inputForm.reset();
-      elements.inputField.focus();
-    },
+    true: () => {},
     false: () => {
       elements.inputField.classList.add('is-invalid');
       elements.inputFeedback.classList.remove('text-success');
       elements.inputFeedback.classList.add('text-danger');
-      elements.inputFeedback.textContent = watchedState.inputFeedback;
+      elements.inputFeedback.textContent = watchedState.error;
     },
   };
 
   validationScenarios[validationState]();
 };
 
-const renderInputFeedback = (elements, value) => {
-  elements.inputFeedback.textContent = value;
+const renderInputFormChanges = (elements, watchedState, inputFormState, i18next) => {
+  const renderInputFormChangesByState = {
+    filing: () => {},
+    processing: () => {
+      elements.inputFeedback.textContent = '';
+      elements.inputField.classList.remove('is-invalid');
+      elements.inputField.setAttribute('readonly', 'true');
+      elements.submitButton.disabled = true;
+    },
+    processed: () => {
+      /* elements.inputField.classList.add('is-valid'); */
+      elements.inputField.removeAttribute('readonly');
+      elements.submitButton.disabled = false;
+      elements.inputFeedback.classList.remove('text-danger');
+      elements.inputFeedback.classList.add('text-success');
+      elements.inputFeedback.textContent = i18next.t('inputFeedback.success');
+      elements.inputForm.reset();
+      elements.inputField.focus();
+    },
+    failed: () => {
+      /* elements.inputField.classList.add('is-invalid'); */
+      elements.inputField.removeAttribute('readonly');
+      elements.submitButton.disabled = false;
+      elements.inputFeedback.classList.remove('text-success');
+      elements.inputFeedback.classList.add('text-danger');
+      elements.inputFeedback.textContent = watchedState.error;
+    },
+  };
+
+  renderInputFormChangesByState[inputFormState]();
+};
+
+const renderErrorMessage = (elements, watchedState) => {
+  elements.inputFeedback.textContent = watchedState.error;
 };
 
 const generateCard = (path, container, i18next) => {
@@ -97,18 +121,23 @@ const renderPosts = (path, elements, watchedState, i18next) => {
 };
 
 export default (path, elements, watchedState, value, i18next) => {
-  switch (path) {
-    case 'inputFormValidation.valid': renderValidationResult(elements, watchedState, value, i18next);
-      break;
-    case 'inputFeedback': renderInputFeedback(elements, value);
-      break;
-    case 'feeds': renderFeeds(path, elements, watchedState, i18next);
-      break;
-    case 'posts': renderPosts(path, elements, watchedState, i18next);
-      break;
-    case 'inputFormValidation.state':
-      return;
-    default:
-      throw new Error(`Unknown change of state: ${path}`);
+  try {
+    switch (path) {
+      case 'inputForm.valid': renderValidationResult(elements, watchedState, value);
+        break;
+      case 'inputForm.state': renderInputFormChanges(elements, watchedState, value, i18next);
+        break;
+      case 'error': renderErrorMessage(elements, watchedState);
+        break;
+      case 'feeds': renderFeeds(path, elements, watchedState, i18next);
+        break;
+      case 'posts': renderPosts(path, elements, watchedState, i18next);
+        break;
+      default:
+        throw new Error(`Unknown change of state: ${path}`);
+    }
+  } catch (error) {
+    elements.inputFeedback.textContent = i18next.t('inputFeedback.errors.unknownError');
+    console.log(error);
   }
 };
