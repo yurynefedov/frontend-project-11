@@ -42,12 +42,11 @@ const elements = {
   postsContainer: document.querySelector('.posts'),
   feedsContainer: document.querySelector('.feeds'),
 };
+const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
-const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?url=${encodeURIComponent(url)}`;
-
-const getFeedsAndPostsData = (content, watchedState, url) => {
+const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
   try {
-    const channel = content.querySelector('channel');
+    const channel = parsedContent.querySelector('channel');
     const feedTitle = channel.querySelector('title');
     const feedDescription = channel.querySelector('description');
 
@@ -79,6 +78,40 @@ const getFeedsAndPostsData = (content, watchedState, url) => {
   }
 };
 
+const updatePosts = (watchedState) => {
+  const promises = watchedState.feeds.map((feed) => axios.get(proxifyUrl(feed.url))
+    .then((response) => {
+      const parsedContent = RSSparser(response.data.contents);
+      const channel = parsedContent.querySelector('channel');
+      const items = channel.querySelectorAll('item');
+
+      const loadedPosts = [];
+      items.forEach((item) => {
+        const itemTitle = item.querySelector('title');
+        const itemDescription = item.querySelector('description');
+        const itemLink = item.querySelector('link');
+
+        const post = {
+          title: itemTitle.textContent,
+          description: itemDescription.textContent,
+          link: itemLink.textContent,
+          feedId: feed.id,
+          id: uniqueId(),
+        };
+        loadedPosts.unshift(post);
+      });
+
+      const existedPosts = watchedState.posts;
+      const existedPostsUrls = existedPosts.map((post) => post.link);
+      const newPosts = loadedPosts.filter((post) => !existedPostsUrls.includes(post.link));
+      newPosts.forEach((post) => watchedState.posts.unshift(post));
+
+      console.log(watchedState.posts.length); // Отладка
+    }));
+
+  return Promise.all(promises).then(() => setTimeout(updatePosts, 5000, watchedState));
+};
+
 export default () => {
   const state = {
     feeds: [],
@@ -108,7 +141,7 @@ export default () => {
       })
       .then((response) => {
         const sourceContent = RSSparser(response.data.contents);
-        getFeedsAndPostsData(sourceContent, watchedState, url);
+        getFeedAndRelatedPosts(sourceContent, watchedState, url);
         watchedState.inputForm.state = 'processed';
       })
       .catch((error) => {
@@ -117,4 +150,5 @@ export default () => {
         watchedState.error = error.message;
       });
   });
+  updatePosts(watchedState);
 };
