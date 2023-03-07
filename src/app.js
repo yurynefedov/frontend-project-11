@@ -44,39 +44,49 @@ const elements = {
 };
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
+const getFeed = (channel, url) => {
+  const feedTitle = channel.querySelector('title');
+  const feedDescription = channel.querySelector('description');
+
+  return {
+    title: feedTitle.textContent,
+    description: feedDescription.textContent,
+    url,
+    id: uniqueId(),
+  };
+};
+
+const getPost = (item, feed) => {
+  const itemTitle = item.querySelector('title');
+  const itemDescription = item.querySelector('description');
+  const itemLink = item.querySelector('link');
+
+  return {
+    title: itemTitle.textContent,
+    description: itemDescription.textContent,
+    link: itemLink.textContent,
+    feedId: feed.id,
+    id: uniqueId(),
+  };
+};
+
 const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
   try {
     const channel = parsedContent.querySelector('channel');
-    const feedTitle = channel.querySelector('title');
-    const feedDescription = channel.querySelector('description');
-
-    const feed = {
-      title: feedTitle.textContent,
-      description: feedDescription.textContent,
-      url,
-      id: uniqueId(),
-    };
+    const feed = getFeed(channel, url);
     watchedState.feeds.unshift(feed);
 
     const items = channel.querySelectorAll('item');
     items.forEach((item) => {
-      const itemTitle = item.querySelector('title');
-      const itemDescription = item.querySelector('description');
-      const itemLink = item.querySelector('link');
-
-      const post = {
-        title: itemTitle.textContent,
-        description: itemDescription.textContent,
-        link: itemLink.textContent,
-        feedId: feed.id,
-        id: uniqueId(),
-      };
+      const post = getPost(item, feed);
       watchedState.posts.unshift(post);
     });
   } catch {
     throw new Error(i18nInstance.t('inputFeedback.errors.notValidRSS'));
   }
 };
+
+const contentAutoupdateTimer = 5000; // ms
 
 const updatePosts = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios.get(proxifyUrl(feed.url))
@@ -87,29 +97,25 @@ const updatePosts = (watchedState) => {
 
       const loadedPosts = [];
       items.forEach((item) => {
-        const itemTitle = item.querySelector('title');
-        const itemDescription = item.querySelector('description');
-        const itemLink = item.querySelector('link');
-
-        const post = {
-          title: itemTitle.textContent,
-          description: itemDescription.textContent,
-          link: itemLink.textContent,
-          feedId: feed.id,
-          id: uniqueId(),
-        };
+        const post = getPost(item, feed);
         loadedPosts.unshift(post);
       });
 
-      const existedPosts = watchedState.posts;
-      const existedPostsUrls = existedPosts.map((post) => post.link);
+      const existedPostsUrls = watchedState.posts
+        .filter((post) => post.feedId === feed.id)
+        .map((post) => post.link);
       const newPosts = loadedPosts.filter((post) => !existedPostsUrls.includes(post.link));
+
       newPosts.forEach((post) => watchedState.posts.unshift(post));
+    })
+    .catch(() => { throw new Error(i18nInstance.t('inputFeedback.errors.unknownError')); }));
 
-      console.log(watchedState.posts.length); // Отладка
-    }));
-
-  return Promise.all(promises).then(() => setTimeout(updatePosts, 5000, watchedState));
+  return Promise.all(promises)
+    .then(() => setTimeout(updatePosts, contentAutoupdateTimer, watchedState))
+    .catch((error) => {
+      watchedState.inputForm.state = 'failed';
+      watchedState.error = error.message;
+    });
 };
 
 export default () => {
