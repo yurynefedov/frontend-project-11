@@ -30,6 +30,7 @@ yup.setLocale({
     notOneOf: i18nInstance.t('inputFeedback.errors.alreadyExist'),
   },
   string: {
+    required: i18nInstance.t('inputFeedback.errors.isEmpty'),
     url: i18nInstance.t('inputFeedback.errors.notValidUrl'),
   },
 });
@@ -90,6 +91,14 @@ const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
   }
 };
 
+const errorHandler = (error, watchedState) => {
+  if (error.name === 'ValidationError') watchedState.inputForm.valid = false;
+  else watchedState.inputForm.state = 'failed';
+
+  if (axios.isAxiosError(error)) watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
+  else watchedState.error = error.message ?? i18nInstance.t('inputFeedback.errors.unknownError');
+};
+
 const contentAutoupdateTimer = 5000; // ms
 
 const updatePosts = (watchedState) => {
@@ -112,14 +121,15 @@ const updatePosts = (watchedState) => {
 
       newPosts.forEach((post) => watchedState.posts.unshift(post));
     })
-    .catch(() => { throw new Error(i18nInstance.t('inputFeedback.errors.unknownError')); }));
+    .catch(() => {
+      throw new Error(i18nInstance.t('inputFeedback.errors.networkError'));
+    }));
 
   return Promise.all(promises)
-    .then(() => setTimeout(updatePosts, contentAutoupdateTimer, watchedState))
     .catch((error) => {
-      watchedState.inputForm.state = 'failed';
-      watchedState.error = error.message;
-    });
+      errorHandler(error, watchedState);
+    })
+    .finally(() => setTimeout(updatePosts, contentAutoupdateTimer, watchedState));
 };
 
 export default () => {
@@ -159,13 +169,12 @@ export default () => {
         watchedState.inputForm.state = 'processed';
       })
       .catch((error) => {
-        if (error.name === 'ValidationError') watchedState.inputForm.valid = false;
-        else watchedState.inputForm.state = 'failed';
-        watchedState.error = error.message;
+        errorHandler(error, watchedState);
       });
   });
 
   elements.postsContainer.addEventListener('click', (event) => {
+    event.preventDefault();
     const activePost = watchedState.posts.find((post) => post.id === event.target.dataset.id);
     watchedState.UIState.activePost = activePost;
     watchedState.UIState.viewedPostsIds.add(activePost.id);

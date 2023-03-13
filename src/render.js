@@ -1,18 +1,17 @@
-const renderValidationResult = (elements, watchedState, validationState) => {
+const renderValidationResult = (elements, validationState) => {
   const validationScenarios = {
     true: () => {},
     false: () => {
       elements.inputField.classList.add('is-invalid');
       elements.inputFeedback.classList.remove('text-success');
       elements.inputFeedback.classList.add('text-danger');
-      elements.inputFeedback.textContent = watchedState.error;
     },
   };
 
   validationScenarios[validationState]();
 };
 
-const renderInputFormChanges = (elements, watchedState, inputFormState, i18next) => {
+const renderInputFormChanges = (elements, inputFormState, i18next) => {
   const renderInputFormChangesByState = {
     filing: () => {},
     processing: () => {
@@ -37,15 +36,14 @@ const renderInputFormChanges = (elements, watchedState, inputFormState, i18next)
       elements.submitButton.disabled = false;
       elements.inputFeedback.classList.remove('text-success');
       elements.inputFeedback.classList.add('text-danger');
-      elements.inputFeedback.textContent = watchedState.error;
     },
   };
 
   renderInputFormChangesByState[inputFormState]();
 };
 
-const renderErrorMessage = (elements, watchedState) => {
-  elements.inputFeedback.textContent = watchedState.error;
+const renderErrorMessage = (elements, value) => {
+  elements.inputFeedback.textContent = value;
 };
 
 const generateCard = (path, container, i18next) => {
@@ -138,27 +136,22 @@ const renderViewedPost = (value) => {
 };
 
 export default (path, elements, watchedState, value, i18next) => {
-  try {
-    switch (path) {
-      case 'inputForm.valid': renderValidationResult(elements, watchedState, value);
-        break;
-      case 'inputForm.state': renderInputFormChanges(elements, watchedState, value, i18next);
-        break;
-      case 'error': renderErrorMessage(elements, watchedState);
-        break;
-      case 'feeds': renderFeeds(path, elements, watchedState, i18next);
-        break;
-      case 'posts': renderPosts(path, elements, watchedState, i18next);
-        break;
-      case 'UIState.activePost': renderPostPreview(elements, value);
-        break;
-      case 'UIState.viewedPostsIds': renderViewedPost(value);
-        break;
-      default:
-        throw new Error(`Unknown change of state: ${path}`);
-    }
-  } catch (error) {
-    elements.inputFeedback.textContent = i18next.t('inputFeedback.errors.unknownError');
-    console.log(error);
+  switch (path) {
+    case 'inputForm.valid': renderValidationResult(elements, value);
+      break;
+    case 'inputForm.state': renderInputFormChanges(elements, value, i18next);
+      break;
+    case 'error': renderErrorMessage(elements, value);
+      break;
+    case 'feeds': renderFeeds(path, elements, watchedState, i18next);
+      break;
+    case 'posts': renderPosts(path, elements, watchedState, i18next);
+      break;
+    case 'UIState.activePost': renderPostPreview(elements, value);
+      break;
+    case 'UIState.viewedPostsIds': renderViewedPost(value);
+      break;
+    default:
+      throw new Error(`Unknown change of state: ${path}`);
   }
 };
