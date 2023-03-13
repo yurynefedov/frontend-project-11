@@ -96,7 +96,10 @@ const appendPosts = (watchedState, i18next) => {
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     const link = document.createElement('a');
     link.href = post.link;
-    link.classList.add('fw-bold');
+    if (watchedState.UIState.viewedPostsIds.has(post.id)) {
+      link.classList.add('fw-normal');
+      link.classList.add('link-secondary');
+    } else link.classList.add('fw-bold');
     link.setAttribute('data-id', post.id);
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
@@ -128,9 +131,7 @@ const renderPostPreview = (elements, value) => {
 
 const renderViewedPost = (value) => {
   const viewedPostId = [...value].at(-1);
-  console.log(viewedPostId);
   const viewedPost = document.querySelector(`[data-id="${viewedPostId}"]`);
-  console.log(viewedPost);
   viewedPost.classList.remove('fw-bold');
   viewedPost.classList.add('fw-normal');
   viewedPost.classList.add('link-secondary');

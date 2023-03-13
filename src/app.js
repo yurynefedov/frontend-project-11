@@ -167,8 +167,6 @@ export default () => {
 
   elements.postsContainer.addEventListener('click', (event) => {
     const activePost = watchedState.posts.find((post) => post.id === event.target.dataset.id);
-    console.log(activePost.id);
-    console.log('here');
     watchedState.UIState.activePost = activePost;
     watchedState.UIState.viewedPostsIds.add(activePost.id);
   });
