@@ -120,6 +120,22 @@ const renderPosts = (path, elements, watchedState, i18next) => {
   appendPosts(watchedState, i18next);
 };
 
+const renderPostPreview = (elements, value) => {
+  elements.modalWindowTitle.textContent = value.title;
+  elements.modalWindowDescription.textContent = value.description;
+  elements.modalWindowArticleLink.setAttribute('href', value.link);
+};
+
+const renderViewedPost = (value) => {
+  const viewedPostId = [...value].at(-1);
+  console.log(viewedPostId);
+  const viewedPost = document.querySelector(`[data-id="${viewedPostId}"]`);
+  console.log(viewedPost);
+  viewedPost.classList.remove('fw-bold');
+  viewedPost.classList.add('fw-normal');
+  viewedPost.classList.add('link-secondary');
+};
+
 export default (path, elements, watchedState, value, i18next) => {
   try {
     switch (path) {
@@ -132,6 +148,10 @@ export default (path, elements, watchedState, value, i18next) => {
       case 'feeds': renderFeeds(path, elements, watchedState, i18next);
         break;
       case 'posts': renderPosts(path, elements, watchedState, i18next);
+        break;
+      case 'UIState.activePost': renderPostPreview(elements, value);
+        break;
+      case 'UIState.viewedPostsIds': renderViewedPost(value);
         break;
       default:
         throw new Error(`Unknown change of state: ${path}`);

@@ -41,7 +41,11 @@ const elements = {
   submitButton: document.querySelector('button[type="submit"]'),
   postsContainer: document.querySelector('.posts'),
   feedsContainer: document.querySelector('.feeds'),
+  modalWindowTitle: document.querySelector('.modal-title'),
+  modalWindowDescription: document.querySelector('.modal-body'),
+  modalWindowArticleLink: document.querySelector('.full-article'),
 };
+
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
 const getFeed = (channel, url) => {
@@ -127,6 +131,10 @@ export default () => {
       state: 'filing', // filing, processing, processed, failed
       valid: null, // true, false
     },
+    UIState: {
+      viewedPostsIds: new Set(),
+      activePost: null,
+    },
   };
 
   const watchedState = onChange(
@@ -156,5 +164,14 @@ export default () => {
         watchedState.error = error.message;
       });
   });
+
+  elements.postsContainer.addEventListener('click', (event) => {
+    const activePost = watchedState.posts.find((post) => post.id === event.target.dataset.id);
+    console.log(activePost.id);
+    console.log('here');
+    watchedState.UIState.activePost = activePost;
+    watchedState.UIState.viewedPostsIds.add(activePost.id);
+  });
+
   updatePosts(watchedState);
 };
