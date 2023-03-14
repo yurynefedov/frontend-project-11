@@ -2,7 +2,7 @@
 
 # RSS Reader
 
-## Desciption
+## Description
 
 RSS is a specialized format designed to describe news feeds, article announcements, and other materials. It is the simplest way for websites (usually blogs) to allow users to subscribe to changes. Special services called RSS aggregators are used for this purpose. These services can poll the RSS feeds of websites for new posts and display them in a convenient way, marking them as read and so on.
 
@@ -10,7 +10,11 @@ RSS Reader is a service for aggregating RSS feeds, which makes it convenient to 
 
 ## Demonstration
 
-Link: https://frontend-project-11-dun.vercel.app/
+![](https://github.com/yurynefedov/frontend-project-11/demo.gif)
+
+## Link 
+
+https://frontend-project-11-dun.vercel.app/
 
 ## Setup
 
