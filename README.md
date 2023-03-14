@@ -10,7 +10,7 @@ RSS Reader is a service for aggregating RSS feeds, which makes it convenient to 
 
 ## Demonstration
 
-![](https://github.com/yurynefedov/frontend-project-11/demo.gif)
+<img src='./demo.gif'></img>
 
 ## Link 
 
@@ -28,7 +28,6 @@ Or with HTTPS URLs:
 ```
 git clone https://github.com/yurynefedov/frontend-project-11.git 
 ```
-
 ### Run the following command while you are in the root directory:
 
 ```
