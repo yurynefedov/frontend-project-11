@@ -137,15 +137,13 @@ const updatePosts = (watchedState) => {
 
       newPosts.forEach((post) => watchedState.posts.unshift(post));
     })
-    .catch(() => {
-      const customError = new Error(i18nInstance.t('inputFeedback.errors.networkError'));
-      customError.name = 'CustomError';
-      throw customError;
+    .catch((error) => {
+      throw error;
     }));
 
   return Promise.all(promises)
     .catch((error) => {
-      errorHandler(error, watchedState);
+      console.error(`${error.name}: ${error.message}`);
     })
     .finally(() => setTimeout(updatePosts, contentAutoupdateTimer, watchedState));
 };
