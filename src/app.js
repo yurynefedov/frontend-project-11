@@ -100,21 +100,19 @@ const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
 
 const errorHandler = (error, watchedState) => {
   watchedState.error = '';
+  watchedState.inputForm.state = 'failed';
   switch (error.name) {
     case 'ValidationError':
       watchedState.inputForm.valid = false;
       watchedState.error = error.message;
       break;
     case 'CustomError':
-      watchedState.inputForm.state = 'failed';
       watchedState.error = error.message;
       break;
     case 'AxiosError':
-      watchedState.inputForm.state = 'failed';
       watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
       break;
     default:
-      watchedState.inputForm.state = 'failed';
       watchedState.error = i18nInstance.t('inputFeedback.errors.unknownError');
       console.error(`${error.name}: ${error.message}`);
   }
