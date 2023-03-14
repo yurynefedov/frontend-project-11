@@ -8,6 +8,22 @@ import resources from './locales/index.js';
 import RSSparser from './parser.js';
 import staticTextsSetter from './static-texts-setter.js';
 
+const elements = {
+  mainHeader: document.querySelector('h1'),
+  inputForm: document.querySelector('.rss-form'),
+  inputField: document.querySelector('#url-input'),
+  inputLabel: document.querySelector('label[for="url-input"]'),
+  inputExample: document.querySelector('#url-example'),
+  inputFeedback: document.querySelector('.feedback'),
+  submitButton: document.querySelector('button[type="submit"]'),
+  postsContainer: document.querySelector('.posts'),
+  feedsContainer: document.querySelector('.feeds'),
+  modalWindowTitle: document.querySelector('.modal-title'),
+  modalWindowDescription: document.querySelector('.modal-body'),
+  modalWindowArticleLink: document.querySelector('.full-article'),
+  modalWindowCloseButton: document.querySelector('.modal-footer button'),
+};
+
 const i18nInstance = i18next.createInstance();
 i18nInstance.init({
   lng: 'ru',
@@ -35,22 +51,6 @@ yup.setLocale({
     url: i18nInstance.t('inputFeedback.errors.notValidUrl'),
   },
 });
-
-const elements = {
-  mainHeader: document.querySelector('h1'),
-  inputForm: document.querySelector('.rss-form'),
-  inputField: document.querySelector('#url-input'),
-  inputLabel: document.querySelector('label[for="url-input"]'),
-  inputExample: document.querySelector('#url-example'),
-  inputFeedback: document.querySelector('.feedback'),
-  submitButton: document.querySelector('button[type="submit"]'),
-  postsContainer: document.querySelector('.posts'),
-  feedsContainer: document.querySelector('.feeds'),
-  modalWindowTitle: document.querySelector('.modal-title'),
-  modalWindowDescription: document.querySelector('.modal-body'),
-  modalWindowArticleLink: document.querySelector('.full-article'),
-  modalWindowCloseButton: document.querySelector('.modal-footer button'),
-};
 
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
@@ -98,26 +98,6 @@ const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
   }
 };
 
-const errorHandler = (error, watchedState) => {
-  watchedState.error = '';
-  watchedState.inputForm.state = 'failed';
-  switch (error.name) {
-    case 'ValidationError':
-      watchedState.inputForm.valid = false;
-      watchedState.error = error.message;
-      break;
-    case 'CustomError':
-      watchedState.error = error.message;
-      break;
-    case 'AxiosError':
-      watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
-      break;
-    default:
-      watchedState.error = i18nInstance.t('inputFeedback.errors.unknownError');
-      console.error(`${error.name}: ${error.message}`);
-  }
-};
-
 const contentAutoupdateTimer = 5000; // ms
 
 const updatePosts = (watchedState) => {
@@ -149,6 +129,26 @@ const updatePosts = (watchedState) => {
       console.error(`${error.name}: ${error.message}`);
     })
     .finally(() => setTimeout(updatePosts, contentAutoupdateTimer, watchedState));
+};
+
+const errorHandler = (error, watchedState) => {
+  watchedState.error = '';
+  watchedState.inputForm.state = 'failed';
+  switch (error.name) {
+    case 'ValidationError':
+      watchedState.inputForm.valid = false;
+      watchedState.error = error.message;
+      break;
+    case 'CustomError':
+      watchedState.error = error.message;
+      break;
+    case 'AxiosError':
+      watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
+      break;
+    default:
+      watchedState.error = i18nInstance.t('inputFeedback.errors.unknownError');
+      console.error(`${error.name}: ${error.message}`);
+  }
 };
 
 export default () => {
