@@ -87,16 +87,32 @@ const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
       watchedState.posts.unshift(post);
     });
   } catch {
-    throw new Error(i18nInstance.t('inputFeedback.errors.notValidRSS'));
+    const customError = new Error(i18nInstance.t('inputFeedback.errors.notValidRSS'));
+    customError.name = 'CustomError';
+    throw customError;
   }
 };
 
 const errorHandler = (error, watchedState) => {
-  if (error.name === 'ValidationError') watchedState.inputForm.valid = false;
-  else watchedState.inputForm.state = 'failed';
-
-  if (axios.isAxiosError(error)) watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
-  else watchedState.error = error.message ?? i18nInstance.t('inputFeedback.errors.unknownError');
+  watchedState.error = '';
+  switch (error.name) {
+    case 'ValidationError':
+      watchedState.inputForm.valid = false;
+      watchedState.error = error.message;
+      break;
+    case 'CustomError':
+      watchedState.inputForm.state = 'failed';
+      watchedState.error = error.message;
+      break;
+    case 'AxiosError':
+      watchedState.inputForm.state = 'failed';
+      watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
+      break;
+    default:
+      watchedState.inputForm.state = 'failed';
+      watchedState.error = i18nInstance.t('inputFeedback.errors.unknownError');
+      console.error(`${error.name}: ${error.message}`);
+  }
 };
 
 const contentAutoupdateTimer = 5000; // ms
@@ -122,7 +138,9 @@ const updatePosts = (watchedState) => {
       newPosts.forEach((post) => watchedState.posts.unshift(post));
     })
     .catch(() => {
-      throw new Error(i18nInstance.t('inputFeedback.errors.networkError'));
+      const customError = new Error(i18nInstance.t('inputFeedback.errors.networkError'));
+      customError.name = 'CustomError';
+      throw customError;
     }));
 
   return Promise.all(promises)
