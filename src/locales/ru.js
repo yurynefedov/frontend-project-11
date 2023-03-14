@@ -1,5 +1,16 @@
 export default {
   translation: {
+    mainHeader: 'RSS-агрегатор',
+    feeds: 'Фиды',
+    posts: 'Посты',
+    postViewButton: 'Просмотр',
+
+    inputForm: {
+      label: 'RSS-ссылка',
+      button: 'Добавить',
+      example: 'Пример: https://ru.hexlet.io/lessons.rss',
+    },
+
     inputFeedback: {
       errors: {
         notValidUrl: 'Ссылка должна быть валидным URL',
@@ -11,8 +22,10 @@ export default {
       },
       success: 'RSS успешно загружен',
     },
-    feeds: 'Фиды',
-    posts: 'Посты',
-    postViewButton: 'Просмотр',
+
+    modalWindow: {
+      readArticleButton: 'Читать полностью',
+      closeButton: 'Закрыть',
+    },
   },
 };

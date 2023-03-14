@@ -6,6 +6,7 @@ import { uniqueId } from 'lodash';
 import render from './render.js';
 import resources from './locales/index.js';
 import RSSparser from './parser.js';
+import staticTextsSetter from './static-texts-setter.js';
 
 const i18nInstance = i18next.createInstance();
 i18nInstance.init({
@@ -36,8 +37,11 @@ yup.setLocale({
 });
 
 const elements = {
+  mainHeader: document.querySelector('h1'),
   inputForm: document.querySelector('.rss-form'),
   inputField: document.querySelector('#url-input'),
+  inputLabel: document.querySelector('label[for="url-input"]'),
+  inputExample: document.querySelector('#url-example'),
   inputFeedback: document.querySelector('.feedback'),
   submitButton: document.querySelector('button[type="submit"]'),
   postsContainer: document.querySelector('.posts'),
@@ -45,6 +49,7 @@ const elements = {
   modalWindowTitle: document.querySelector('.modal-title'),
   modalWindowDescription: document.querySelector('.modal-body'),
   modalWindowArticleLink: document.querySelector('.full-article'),
+  modalWindowCloseButton: document.querySelector('.modal-footer button'),
 };
 
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
@@ -167,6 +172,8 @@ export default () => {
     state,
     (path, value) => render(path, elements, state, value, i18nInstance),
   );
+
+  staticTextsSetter(elements, i18nInstance);
 
   elements.inputForm.addEventListener('submit', (event) => {
     event.preventDefault();
