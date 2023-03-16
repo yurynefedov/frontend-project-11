@@ -10,7 +10,7 @@ RSS Reader is a service for aggregating RSS feeds, which makes it convenient to 
 
 ## Demonstration
 
-<img src='./demo.gif'></img>
+<img src='./demonstration.gif'></img>
 
 ## Link 
 
