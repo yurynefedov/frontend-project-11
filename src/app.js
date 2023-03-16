@@ -19,7 +19,12 @@ const validateForm = (url, existedFeedsUrls) => {
   return schema.validate(url, { abortEarly: false });
 };
 
-const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+const proxifyUrl = (url) => {
+  const proxifiedUrl = new URL('/get', 'https://allorigins.hexlet.app');
+  proxifiedUrl.searchParams.append('disableCache', 'true');
+  proxifiedUrl.searchParams.append('url', url);
+  return proxifiedUrl;
+};
 
 const getFeed = (channel, url) => {
   const feedTitle = channel.querySelector('title');
