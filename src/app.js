@@ -111,14 +111,6 @@ const app = () => {
     modalWindowCloseButton: document.querySelector('.modal-footer button'),
   };
 
-  const i18nInstance = i18next.createInstance();
-
-  i18nInstance.init({
-    lng: 'ru',
-    debug: true,
-    resources,
-  });
-
   yup.setLocale({
     mixed: {
       notOneOf: 'alreadyExist',
@@ -129,41 +121,48 @@ const app = () => {
     },
   });
 
+  const i18nInstance = i18next.createInstance();
+
   const watchedState = onChange(
     state,
     (path, value) => render(path, elements, state, value, i18nInstance),
   );
 
-  staticTextsSetter(elements, i18nInstance);
+  i18nInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  }).then(() => {
+    staticTextsSetter(elements, i18nInstance);
+    elements.inputForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const url = formData.get('url').trim().toLowerCase();
+      const existedFeedsUrls = watchedState.feeds.map((feed) => feed.url);
+      validateForm(url, existedFeedsUrls)
+        .then((validUrl) => {
+          watchedState.inputForm.valid = true;
+          watchedState.inputForm.state = 'processing';
+          return axios.get(proxifyUrl(validUrl));
+        })
+        .then((response) => {
+          const sourceContent = rssParser(response.data.contents, url);
+          addFeedAndRelatedPosts(sourceContent, watchedState);
+          watchedState.inputForm.state = 'processed';
+        })
+        .catch((error) => {
+          errorHandler(error, watchedState);
+        });
+    });
 
-  elements.inputForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const url = formData.get('url').trim().toLowerCase();
-    const existedFeedsUrls = watchedState.feeds.map((feed) => feed.url);
-    validateForm(url, existedFeedsUrls)
-      .then((validUrl) => {
-        watchedState.inputForm.valid = true;
-        watchedState.inputForm.state = 'processing';
-        return axios.get(proxifyUrl(validUrl));
-      })
-      .then((response) => {
-        const sourceContent = rssParser(response.data.contents, url);
-        addFeedAndRelatedPosts(sourceContent, watchedState);
-        watchedState.inputForm.state = 'processed';
-      })
-      .catch((error) => {
-        errorHandler(error, watchedState);
-      });
+    elements.postsContainer.addEventListener('click', (event) => {
+      const activePost = watchedState.posts.find((post) => post.id === event.target.dataset.id);
+      watchedState.UIState.activePost = activePost;
+      watchedState.UIState.viewedPostsIds.add(activePost.id);
+    });
+
+    updatePosts(watchedState);
   });
-
-  elements.postsContainer.addEventListener('click', (event) => {
-    const activePost = watchedState.posts.find((post) => post.id === event.target.dataset.id);
-    watchedState.UIState.activePost = activePost;
-    watchedState.UIState.viewedPostsIds.add(activePost.id);
-  });
-
-  updatePosts(watchedState);
 };
 
 export default app;
