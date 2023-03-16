@@ -42,8 +42,8 @@ const renderInputFormChanges = (elements, inputFormState, i18next) => {
   renderInputFormChangesByState[inputFormState]();
 };
 
-const renderErrorMessage = (elements, value) => {
-  elements.inputFeedback.textContent = value;
+const renderErrorMessage = (elements, value, i18next) => {
+  elements.inputFeedback.textContent = i18next.t(`inputFeedback.errors.${value}`);
 };
 
 const generateCard = (path, container, i18next) => {
@@ -141,7 +141,7 @@ export default (path, elements, watchedState, value, i18next) => {
       break;
     case 'inputForm.state': renderInputFormChanges(elements, value, i18next);
       break;
-    case 'error': renderErrorMessage(elements, value);
+    case 'error': renderErrorMessage(elements, value, i18next);
       break;
     case 'feeds': renderFeeds(path, elements, watchedState, i18next);
       break;

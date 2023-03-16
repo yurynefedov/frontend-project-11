@@ -44,11 +44,11 @@ const validateForm = (url, existedFeedsUrls) => {
 
 yup.setLocale({
   mixed: {
-    notOneOf: i18nInstance.t('inputFeedback.errors.alreadyExist'),
+    notOneOf: 'alreadyExist',
   },
   string: {
-    required: i18nInstance.t('inputFeedback.errors.isEmpty'),
-    url: i18nInstance.t('inputFeedback.errors.notValidUrl'),
+    required: 'isEmpty',
+    url: 'notValidUrl',
   },
 });
 
@@ -92,7 +92,7 @@ const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
       watchedState.posts.unshift(post);
     });
   } catch {
-    const customError = new Error(i18nInstance.t('inputFeedback.errors.notValidRSS'));
+    const customError = new Error('notValidRSS');
     customError.name = 'CustomError';
     throw customError;
   }
@@ -143,10 +143,10 @@ const errorHandler = (error, watchedState) => {
       watchedState.error = error.message;
       break;
     case 'AxiosError':
-      watchedState.error = i18nInstance.t('inputFeedback.errors.networkError');
+      watchedState.error = 'networkError';
       break;
     default:
-      watchedState.error = i18nInstance.t('inputFeedback.errors.unknownError');
+      watchedState.error = 'unknownError';
       console.error(`${error.name}: ${error.message}`);
   }
 };
