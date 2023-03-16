@@ -26,48 +26,12 @@ const proxifyUrl = (url) => {
   return proxifiedUrl;
 };
 
-const getFeed = (channel, url) => {
-  const feedTitle = channel.querySelector('title');
-  const feedDescription = channel.querySelector('description');
-
-  return {
-    title: feedTitle.textContent,
-    description: feedDescription.textContent,
-    url,
-    id: uniqueId(),
-  };
-};
-
-const getPost = (item, feed) => {
-  const itemTitle = item.querySelector('title');
-  const itemDescription = item.querySelector('description');
-  const itemLink = item.querySelector('link');
-
-  return {
-    title: itemTitle.textContent,
-    description: itemDescription.textContent,
-    link: itemLink.textContent,
-    feedId: feed.id,
-    id: uniqueId(),
-  };
-};
-
-const getFeedAndRelatedPosts = (parsedContent, watchedState, url) => {
-  try {
-    const channel = parsedContent.querySelector('channel');
-    const feed = getFeed(channel, url);
-    watchedState.feeds.unshift(feed);
-
-    const items = channel.querySelectorAll('item');
-    items.forEach((item) => {
-      const post = getPost(item, feed);
-      watchedState.posts.unshift(post);
-    });
-  } catch {
-    const customError = new Error('notValidRSS');
-    customError.name = 'CustomError';
-    throw customError;
-  }
+const addFeedAndRelatedPosts = (parsedContent, watchedState) => {
+  const { feed, posts } = parsedContent;
+  feed.id = uniqueId();
+  watchedState.feeds.unshift(feed);
+  posts.map((post) => Object.assign(post, { feedId: feed.id, id: uniqueId() }));
+  posts.forEach((post) => watchedState.posts.unshift(post));
 };
 
 const contentAutoupdateTimer = 5000; // ms
@@ -75,21 +39,13 @@ const contentAutoupdateTimer = 5000; // ms
 const updatePosts = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios.get(proxifyUrl(feed.url))
     .then((response) => {
-      const parsedContent = rssParser(response.data.contents);
-      const channel = parsedContent.querySelector('channel');
-      const items = channel.querySelectorAll('item');
-
-      const loadedPosts = [];
-      items.forEach((item) => {
-        const post = getPost(item, feed);
-        loadedPosts.unshift(post);
-      });
-
-      const existedPostsUrls = watchedState.posts
+      const parsedContent = rssParser(response.data.contents, feed.url);
+      const { posts } = parsedContent;
+      const existedPostsLinks = watchedState.posts
         .filter((post) => post.feedId === feed.id)
         .map((post) => post.link);
-      const newPosts = loadedPosts.filter((post) => !existedPostsUrls.includes(post.link));
-
+      const newPosts = posts.filter((post) => !existedPostsLinks.includes(post.link));
+      newPosts.map((post) => Object.assign(post, { feedId: feed.id, id: uniqueId() }));
       newPosts.forEach((post) => watchedState.posts.unshift(post));
     })
     .catch((error) => {
@@ -192,8 +148,8 @@ const app = () => {
         return axios.get(proxifyUrl(validUrl));
       })
       .then((response) => {
-        const sourceContent = rssParser(response.data.contents);
-        getFeedAndRelatedPosts(sourceContent, watchedState, url);
+        const sourceContent = rssParser(response.data.contents, url);
+        addFeedAndRelatedPosts(sourceContent, watchedState);
         watchedState.inputForm.state = 'processed';
       })
       .catch((error) => {
