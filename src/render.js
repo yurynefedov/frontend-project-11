@@ -1,3 +1,15 @@
+const setStaticTexts = (elements, i18next) => {
+  elements.mainHeader.textContent = i18next.t('mainHeader');
+  elements.description.textContent = i18next.t('description');
+  elements.inputLabel.textContent = i18next.t('inputForm.label');
+  elements.submitButton.textContent = i18next.t('inputForm.button');
+  elements.inputExample.textContent = i18next.t('inputForm.example');
+  elements.modalWindowArticleLink.textContent = i18next.t('modalWindow.readArticleButton');
+  elements.modalWindowCloseButton.textContent = i18next.t('modalWindow.closeButton');
+};
+
+const renderInit = (elements, i18next) => setStaticTexts(elements, i18next);
+
 const renderValidationResult = (elements, validationState) => {
   const validationScenarios = {
     true: () => {},
@@ -134,8 +146,7 @@ const renderViewedPost = (value) => {
   viewedPost.classList.add('fw-normal');
   viewedPost.classList.add('link-secondary');
 };
-
-export default (path, elements, watchedState, value, i18next) => {
+const render = (path, elements, watchedState, value, i18next) => {
   switch (path) {
     case 'inputForm.valid': renderValidationResult(elements, value);
       break;
@@ -155,3 +166,5 @@ export default (path, elements, watchedState, value, i18next) => {
       throw new Error(`Unknown change of state: ${path}`);
   }
 };
+
+export { renderInit, render };

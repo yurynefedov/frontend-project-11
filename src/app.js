@@ -3,10 +3,9 @@ import onChange from 'on-change';
 import i18next from 'i18next';
 import axios from 'axios';
 import { uniqueId } from 'lodash';
-import render from './render.js';
+import { renderInit, render } from './render.js';
 import resources from './locales/index.js';
 import rssParser from './parser.js';
-import staticTextsSetter from './static-texts-setter.js';
 
 const validateForm = (url, existedFeedsUrls) => {
   const schema = yup
@@ -133,7 +132,7 @@ const app = () => {
     debug: true,
     resources,
   }).then(() => {
-    staticTextsSetter(elements, i18nInstance);
+    renderInit(elements, i18nInstance);
     elements.inputForm.addEventListener('submit', (event) => {
       event.preventDefault();
       const formData = new FormData(event.target);
