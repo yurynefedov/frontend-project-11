@@ -5,32 +5,8 @@ import axios from 'axios';
 import { uniqueId } from 'lodash';
 import render from './render.js';
 import resources from './locales/index.js';
-import RSSparser from './parser.js';
+import rssParser from './parser.js';
 import staticTextsSetter from './static-texts-setter.js';
-
-const elements = {
-  mainHeader: document.querySelector('h1'),
-  description: document.querySelector('.lead'),
-  inputForm: document.querySelector('.rss-form'),
-  inputField: document.querySelector('#url-input'),
-  inputLabel: document.querySelector('label[for="url-input"]'),
-  inputExample: document.querySelector('#url-example'),
-  inputFeedback: document.querySelector('.feedback'),
-  submitButton: document.querySelector('button[type="submit"]'),
-  postsContainer: document.querySelector('.posts'),
-  feedsContainer: document.querySelector('.feeds'),
-  modalWindowTitle: document.querySelector('.modal-title'),
-  modalWindowDescription: document.querySelector('.modal-body'),
-  modalWindowArticleLink: document.querySelector('.full-article'),
-  modalWindowCloseButton: document.querySelector('.modal-footer button'),
-};
-
-const i18nInstance = i18next.createInstance();
-i18nInstance.init({
-  lng: 'ru',
-  debug: true,
-  resources,
-});
 
 const validateForm = (url, existedFeedsUrls) => {
   const schema = yup
@@ -42,16 +18,6 @@ const validateForm = (url, existedFeedsUrls) => {
 
   return schema.validate(url, { abortEarly: false });
 };
-
-yup.setLocale({
-  mixed: {
-    notOneOf: 'alreadyExist',
-  },
-  string: {
-    required: 'isEmpty',
-    url: 'notValidUrl',
-  },
-});
 
 const proxifyUrl = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
@@ -104,7 +70,7 @@ const contentAutoupdateTimer = 5000; // ms
 const updatePosts = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios.get(proxifyUrl(feed.url))
     .then((response) => {
-      const parsedContent = RSSparser(response.data.contents);
+      const parsedContent = rssParser(response.data.contents);
       const channel = parsedContent.querySelector('channel');
       const items = channel.querySelectorAll('item');
 
@@ -152,7 +118,7 @@ const errorHandler = (error, watchedState) => {
   }
 };
 
-export default () => {
+const app = () => {
   const state = {
     feeds: [],
     posts: [],
@@ -166,6 +132,41 @@ export default () => {
       activePost: null,
     },
   };
+
+  const elements = {
+    mainHeader: document.querySelector('h1'),
+    description: document.querySelector('.lead'),
+    inputForm: document.querySelector('.rss-form'),
+    inputField: document.querySelector('#url-input'),
+    inputLabel: document.querySelector('label[for="url-input"]'),
+    inputExample: document.querySelector('#url-example'),
+    inputFeedback: document.querySelector('.feedback'),
+    submitButton: document.querySelector('button[type="submit"]'),
+    postsContainer: document.querySelector('.posts'),
+    feedsContainer: document.querySelector('.feeds'),
+    modalWindowTitle: document.querySelector('.modal-title'),
+    modalWindowDescription: document.querySelector('.modal-body'),
+    modalWindowArticleLink: document.querySelector('.full-article'),
+    modalWindowCloseButton: document.querySelector('.modal-footer button'),
+  };
+
+  const i18nInstance = i18next.createInstance();
+
+  i18nInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  });
+
+  yup.setLocale({
+    mixed: {
+      notOneOf: 'alreadyExist',
+    },
+    string: {
+      required: 'isEmpty',
+      url: 'notValidUrl',
+    },
+  });
 
   const watchedState = onChange(
     state,
@@ -186,7 +187,7 @@ export default () => {
         return axios.get(proxifyUrl(validUrl));
       })
       .then((response) => {
-        const sourceContent = RSSparser(response.data.contents);
+        const sourceContent = rssParser(response.data.contents);
         getFeedAndRelatedPosts(sourceContent, watchedState, url);
         watchedState.inputForm.state = 'processed';
       })
@@ -203,3 +204,5 @@ export default () => {
 
   updatePosts(watchedState);
 };
+
+export default app;
