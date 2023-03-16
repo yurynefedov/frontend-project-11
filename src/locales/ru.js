@@ -1,12 +1,13 @@
 export default {
   translation: {
     mainHeader: 'RSS-агрегатор',
+    description: 'Начните читать RSS сегодня! Это легко, это красиво.',
     feeds: 'Фиды',
     posts: 'Посты',
     postViewButton: 'Просмотр',
 
     inputForm: {
-      label: 'RSS-ссылка',
+      label: 'Ссылка RSS',
       button: 'Добавить',
       example: 'Пример: https://ru.hexlet.io/lessons.rss',
     },

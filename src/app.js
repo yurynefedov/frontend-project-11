@@ -10,6 +10,7 @@ import staticTextsSetter from './static-texts-setter.js';
 
 const elements = {
   mainHeader: document.querySelector('h1'),
+  description: document.querySelector('.lead'),
   inputForm: document.querySelector('.rss-form'),
   inputField: document.querySelector('#url-input'),
   inputLabel: document.querySelector('label[for="url-input"]'),
